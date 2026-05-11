@@ -1,0 +1,15 @@
+FROM ubuntu:22.04
+
+RUN apt-get update && \
+    apt-get install -y gcc make gdb valgrind && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY . .
+
+# Build with AddressSanitizer + full debug info
+RUN make clean && \
+    make CFLAGS="-Wall -Wextra -std=c11 -I include -D_GNU_SOURCE -g -fsanitize=address,undefined -fno-omit-frame-pointer"
+
+ENV ASAN_OPTIONS=abort_on_error=1:detect_stack_use_after_return=1
+CMD ["./parking_system"]
